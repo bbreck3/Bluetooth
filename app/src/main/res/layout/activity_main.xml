@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity"
+    android:id="@+id/ass">
 
     <TextView
         android:id="@+id/text"
@@ -15,19 +16,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="30dp" >
+        android:layout_marginTop="30dp"
+        android:weightSum="1"
+        android:id="@+id/linearLayout2">
 
         <Button
             android:id="@+id/turnOn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/on" />
-
-        <Button
-            android:id="@+id/turnOff"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/off" />
 
     </LinearLayout>
 
@@ -36,27 +33,132 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="80dp" >
-
-        <Button
-            android:id="@+id/paired"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/List" />
-
-        <Button
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Find" />
-
-        <ListView
-            android:id="@+id/listView1"
-            android:layout_width="fill_parent"
-            android:layout_height="200dp" >
-
-        </ListView>
+        android:layout_marginTop="80dp"
+        android:id="@+id/linearLayout">
 
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/listView1"
+        android:layout_width="fill_parent"
+        android:layout_height="123dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="97dp">
+
+    </ListView>
+
+    <Button
+        android:id="@+id/search"
+        android:layout_width="79dp"
+        android:layout_height="wrap_content"
+        android:text="@string/Find"
+        android:layout_above="@+id/listView1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/paired"
+        android:layout_width="71dp"
+        android:layout_height="wrap_content"
+        android:text="@string/List"
+        android:layout_above="@+id/search"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/turnOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/off"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Voltage"
+        android:id="@+id/textViewVolt"
+        android:layout_weight="0.06"
+        android:layout_alignBottom="@+id/text"
+        android:layout_toRightOf="@+id/turnOff"
+        android:layout_toEndOf="@+id/turnOff"
+        android:layout_marginLeft="43dp"
+        android:layout_marginStart="43dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Pounds"
+        android:id="@+id/textView_Pounds"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_alignLeft="@+id/textViewVolt"
+        android:layout_alignStart="@+id/textViewVolt" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Data"
+        android:id="@+id/btn_records"
+        android:layout_below="@+id/textView_Pounds"
+        android:layout_alignLeft="@+id/textView_Pounds"
+        android:layout_alignStart="@+id/textView_Pounds" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView_Data"
+        android:choiceMode="singleChoice"
+        android:layout_below="@+id/btn_records"
+        android:layout_alignLeft="@+id/btn_records"
+        android:layout_alignStart="@+id/btn_records"
+        android:layout_alignRight="@+id/btn_records"
+        android:layout_alignEnd="@+id/btn_records"
+        android:layout_above="@+id/listView1" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView_selectData"
+        android:layout_toRightOf="@+id/btn_records"
+        android:layout_toEndOf="@+id/btn_records"
+        android:layout_below="@+id/turnOff"
+        android:choiceMode="singleChoice"
+        android:layout_alignBottom="@+id/search" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Select Value"
+        android:id="@+id/textView_selectVal"
+        android:layout_alignBottom="@+id/turnOff"
+        android:layout_alignRight="@+id/listView_selectData"
+        android:layout_alignEnd="@+id/listView_selectData" />
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="data_input"
+        android:id="@+id/toggleButton"
+        android:checked="false"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/listView_selectData"
+        android:layout_toStartOf="@+id/listView_selectData" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Press to Turn On Alert,If of chooce from select values to activiate alert"
+        android:id="@+id/textView_alert_on_1"
+        android:layout_above="@+id/toggleButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

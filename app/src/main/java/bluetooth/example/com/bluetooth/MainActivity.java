@@ -10,18 +10,25 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+
+import java.util.ArrayList;
 import java.util.Set;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.view.View;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.widget.ToggleButton;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -35,11 +42,126 @@ public class MainActivity extends ActionBarActivity {
     private Set<BluetoothDevice> pairedDevices;
     private ListView myListView;
     private ArrayAdapter<String> BTArrayAdapter;
-
+    private Button rec_data; // record data
+    private ListView rec_data_list; // list view to add the recorded data to
+    private ListView select_val_list;
+    private TextView dig_volt; // textview to hold the current current digital voltage
+    private TextView pound; // textview to hold the current pounds of weight
+    private ToggleButton toggleButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final ArrayList<String> listdata = new ArrayList<String>();
+        final ArrayList<String> static_data_list = new ArrayList<String>();
+    playSound();
+        /*
+
+        Testing the the Button capture of the data record
+
+        */
+
+        dig_volt = (TextView)findViewById(R.id.textViewVolt);
+        pound = (TextView)findViewById(R.id.textView_Pounds);
+        rec_data = (Button)findViewById(R.id.btn_records);
+        rec_data_list = (ListView)findViewById(R.id.listView_Data);
+        select_val_list = (ListView)findViewById(R.id.listView_selectData);
+       // toggleButton = (ToggleButton)findViewById(R.id.toggleButton);
+
+        // Define a new Adapter
+        // First parameter - Context
+        // Second parameter - Layout for the row
+        // Third parameter - ID of the TextView to which the data is written
+        // Forth - the Array of data
+
+
+        // Record Data List Value: Adapter
+        ArrayAdapter<String> data_adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1,listdata);
+
+        // Select Value List View Adapter
+        ArrayAdapter<String> select_adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1,static_data_list);
+
+        rec_data.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                String dig_temp = ": 10";
+                String pound_temp = ": 1";
+                dig_volt.append(dig_temp);
+                pound.append(pound_temp);
+                listdata.add(dig_volt.getText().toString() + " : " + pound.getText().toString() );
+                static_data_list.add(pound.getText().toString());
+                //  rec_data_list.addView(listdata);
+            }
+        });
+
+        // Assign adapter to ListView
+        rec_data_list.setAdapter(data_adapter);
+        select_val_list.setAdapter(select_adapter);
+
+        /*
+
+
+
+
+         ListView Item Click Listener -- > Impliments Record Data ListView
+          */
+        rec_data_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                // ListView Clicked item index
+                int itemPosition = position;
+
+                // ListView Clicked item value
+                String itemValue = (String) rec_data_list.getItemAtPosition(position);
+
+                // Show Alert
+                Toast.makeText(getApplicationContext(),
+                        "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
+                        .show();
+
+            }
+
+        });
+
+
+
+         /*
+
+
+
+
+         ListView Item Click Listener -- > Impliments Select VAlue ListView
+          */
+        select_val_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                // ListView Clicked item index
+                int itemPosition = position;
+
+                // ListView Clicked item value
+                String itemValue = (String) select_val_list.getItemAtPosition(position);
+
+                // Show Alert
+                Toast.makeText(getApplicationContext(),
+                        "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
+                        .show();
+
+            }
+
+        });
+
+
+
 
         // take an instance of BluetoothAdapter - Bluetooth radio
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -100,6 +222,49 @@ public class MainActivity extends ActionBarActivity {
             BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
             myListView.setAdapter(BTArrayAdapter);
         }
+    }
+
+
+    public void playSound(){
+        toggleButton = (ToggleButton)findViewById(R.id.toggleButton);
+
+
+        toggleButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                //Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                MediaPlayer mp = MediaPlayer.create(getApplicationContext(), notification);
+                mp.start();
+               /* Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+                if(alert == null){
+                    // alert is null, using backup
+                    alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+                    // I can't see this ever being null (as always have a default notification)
+                    // but just incase
+                    if(alert == null) {
+                        // alert backup is null, using 2nd backup
+                        alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    }
+                }*/
+               /* AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), Uri.parse(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)));
+
+                try {
+                    thePlayer.setVolume(Float.parseFloat(Double.toString(audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION) / 7.0)),
+                            Float.parseFloat(Double.toString(audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION) / 7.0)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                thePlayer.start();*/
+            }
+        });
     }
 
     public void on(View view){
