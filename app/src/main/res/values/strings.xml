@@ -11,5 +11,7 @@
     <string name="Find">Search</string>
     <string name="title_activity_splash">splash</string>
     <string name="hello_world">Hello world!</string>
+    <string name="Loading">Loading...</string>
+    <string name="LoadVal"></string>
 
 </resources>

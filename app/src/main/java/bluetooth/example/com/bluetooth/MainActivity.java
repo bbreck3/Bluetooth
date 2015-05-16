@@ -1,6 +1,7 @@
 package bluetooth.example.com.bluetooth;
 
 import android.content.DialogInterface;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
@@ -50,6 +51,18 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
+
+
+
+
+
+
+
+
+
         setContentView(R.layout.activity_main);
 
         /**
@@ -336,6 +349,7 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
+
                     find(v);
                 }
             });
