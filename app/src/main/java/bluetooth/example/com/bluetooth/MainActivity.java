@@ -1,6 +1,7 @@
 package bluetooth.example.com.bluetooth;
 
 import android.content.DialogInterface;
+import android.hardware.camera2.TotalCaptureResult;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -38,31 +39,29 @@ public class MainActivity extends ActionBarActivity {
     private TextView text;
     private BluetoothAdapter myBluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
-    private ListView myListView;
+
     private ArrayAdapter<String> BTArrayAdapter;
+    private ArrayAdapter<String> bt_dev_list_adapt;
+    //lsit of bluetooth devices...
+    private final ArrayList<String> bt_dev_list = new ArrayList<String>();
+
+
     private Button rec_data; // record data
     private ListView rec_data_list; // list view to add the recorded data to
     private ListView select_val_list;
+
     private TextView dig_volt; // textview to hold the current current digital voltage
     private TextView pound; // textview to hold the current pounds of weight
     private ToggleButton toggleButton_sound, toggleButton_bluetooth;
     private TextView bluetooth_status;
     private TextView select_pound;
+    private ListView  myListView1;
+    //my attempt to use a time delay --> while searching for devices : if none found to make a output that says no devices found please try again.... --> doesnt work correctly
+    final int secondsDelayed = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-
-
-
-
-
-
-
-
-
         setContentView(R.layout.activity_main);
 
         /**
@@ -101,8 +100,16 @@ public class MainActivity extends ActionBarActivity {
          *
          *
          */
+
+        //list of the data that simply grabs the pounds
          final ArrayList<String> listdata = new ArrayList<String>();
+
+        //list of the pounds only --> to be used for selection if selected a specific pound measurement as apposed to taing in from the input at the top
+        // --> also to be integrated with the toggle on / off sound
          final ArrayList<String> static_data_list = new ArrayList<String>();
+
+
+
 
         /*
 
@@ -117,7 +124,9 @@ public class MainActivity extends ActionBarActivity {
         rec_data = (Button)findViewById(R.id.btn_records); // this is the button the reads "RECORD DATA"
         rec_data_list = (ListView)findViewById(R.id.listView_Data); // this is the list view that will contain data from "listdata" above
         select_val_list = (ListView)findViewById(R.id.listView_selectData); // this is the listview that will contain data from "static_dat_list" above
-        // toggleButton = (ToggleButton)findViewById(R.id.toggleButton);
+        myListView1= (ListView)findViewById(R.id.listView1); //lsit view that displays the bluetooth device that were found during the search
+        bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
+
 
         // Define a new Adapter
         // First parameter - Context
@@ -147,6 +156,10 @@ public class MainActivity extends ActionBarActivity {
         // Select Value List View Adapter
         ArrayAdapter<String> select_adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1,static_data_list);
+        //Array adapter to add the bluetooth device list to the ListView --> this is wierd: thsi must be here to work, but the actual Adapter that workd and upadte the
+        // bluetooth list is not this one...... --> DO NOT DELETE
+        bt_dev_list_adapt = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1,bt_dev_list);
 
 
         /**
@@ -174,7 +187,7 @@ public class MainActivity extends ActionBarActivity {
                 pound.append(pound_temp);
                 listdata.add(pound.getText().toString() );
                 static_data_list.add(pound.getText().toString());
-                //  rec_data_list.addView(listdata);
+
             }
         });
 
@@ -182,6 +195,7 @@ public class MainActivity extends ActionBarActivity {
         // Assign adapter to ListView
         rec_data_list.setAdapter(data_adapter);
         select_val_list.setAdapter(select_adapter);
+
 
         /*
 
@@ -284,25 +298,25 @@ public class MainActivity extends ActionBarActivity {
 
         // take an instance of BluetoothAdapter - Bluetooth radio
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(myBluetoothAdapter == null) {
+        if(myBluetoothAdapter == null) { // if device does not support bluetoot the display a not supported message
 
             listBtn.setEnabled(false);
             findBtn.setEnabled(false);
-            text.setText("Status: not supported");
+           bluetooth_status.setText("Status: not supported");
 
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
                     Toast.LENGTH_LONG).show();
         } else {
             toggleButton_bluetooth = (ToggleButton)findViewById(R.id.toggleButton_bluetooth);  // sets up the blootooth toggle( the on / off button below status in the app
-            text = (TextView) findViewById(R.id.bluetooth_status); //not important but keep incase it was needed in the future
-            bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
+            //text = (TextView) findViewById(R.id.bluetooth_status); //not important but keep incase it was needed in the future
+
 
             // defines the onclick listener for the bluetooth toggle: what happend if the toggle is in the "ON" or "OFF" state
 
             toggleButton_bluetooth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) { // if "ON" State --> change the status to enabled
-                        bluetooth_status.setText("Enabled");
+                       bluetooth_status.setText("Enabled");
                         // The toggle is enabled
                         if (!myBluetoothAdapter.isEnabled()) {  // if "ON" state and bluetooth is currently off, Request permission to enable, if accepted turn bluetooth on
                             Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -310,18 +324,25 @@ public class MainActivity extends ActionBarActivity {
 
                             Toast.makeText(getApplicationContext(), "Bluetooth turned on", //once blue tooth has been turned on, inform the user with a subtly display
                                     Toast.LENGTH_LONG).show();
+
+                            Toast.makeText(getApplicationContext(), "Searching for devices...", // inform the user that a search for bluetooth devices is in progress
+                                    Toast.LENGTH_LONG).show();
                            ;
 
-                        } else { // if blue tooth funcationality is already state is switched to in" inform user that is is already on
+
+                        } else { // if blue tooth functionality is already state is switched to in" inform user that is is already on and inform use that the search for bluetooth devices is in progress
                             Toast.makeText(getApplicationContext(), "Bluetooth is already on",
+                                    Toast.LENGTH_LONG).show();
+
+                            Toast.makeText(getApplicationContext(), "Searching for devices...",
                                     Toast.LENGTH_LONG).show();
                         }
 
                     }
                     if(!isChecked){ // if the state is turned  to "OFF" chnage the status to Disabled and turn of bluetooth
 
-                        bluetooth_status.setText("Disabled");
-                        myBluetoothAdapter.disable();
+                       bluetooth_status.setText("Disabled");
+                        myBluetoothAdapter.disable(); //disable the addapter
 
                     }
 
@@ -330,7 +351,8 @@ public class MainActivity extends ActionBarActivity {
 
 
             /**
-             *  Funtions that are implemented but need tuning......
+             *  findBtn --> "Search: in the app --> on click finds devices so the find method is called
+             *  listBtn --> Simply List devices that are currently paired: this already works button is hidden in the app as you did not want it
              *
              */
             listBtn = (Button)findViewById(R.id.paired);
@@ -347,19 +369,23 @@ public class MainActivity extends ActionBarActivity {
             findBtn.setOnClickListener(new OnClickListener() {
 
                 @Override
-                public void onClick(View v) {
+                public void onClick(View v) { // if bluetooth is not on and a search is intitiated inform user to turn on bluetooth before searching for device
                     // TODO Auto-generated method stub
-
+                    if(!myBluetoothAdapter.isEnabled()){ // if the bluetooth is not on, prompt user to turn bluetooth on before search for devices
+                        Toast.makeText(getApplicationContext(),"Please turn on BlueTooth before searching.",Toast.LENGTH_LONG).show();
+                    }
+                    else //bluetooth is on so search for device --> with the find method
                     find(v);
                 }
             });
 
-            //lsit view that displays the bluetooth device information
-            myListView = (ListView)findViewById(R.id.listView1);
+
 
             // create the arrayAdapter that contains the BTDevices, and set it to the ListView
-            BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-            myListView.setAdapter(BTArrayAdapter);
+            //THis is the Adapter that actually adds bluetooth devices to the the list
+           BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1,bt_dev_list);
+            //the the listview to the adapter
+            myListView1.setAdapter(BTArrayAdapter);
 
 
         }
@@ -368,12 +394,24 @@ public class MainActivity extends ActionBarActivity {
          *
          *          Sound Section.....
          *
+         *
+         *          This section is an oddly placed as I will go back to the blue tooth section after this one:
+         *          However it must be here because the sound toggle is defined on the onCreate Android method if I take it out then it wont work.
+         *
+         *          The other bluetooth methods are below as they are mehtods with can be defined outside of the onCreate Method....
+         *
+         *
+         *
+         *
+         *
          *          Makes a toggle: if state is "ON" plays a sound, if state is "OFF" turn off music
          *
          *
          *          This section needs work....
          *
          *          For now, just plays music and turns the toggle on and off
+         *
+         *
          *
          *
          */
@@ -441,38 +479,29 @@ public class MainActivity extends ActionBarActivity {
 
 
     /***
-     *              Other various components for Android LifeCycle and other stuff......
+     *
+     *   Coming back to the bluetooth stuff...
      *
      *
-     *
+     * Bluetooth section
      *
      * @param view
      */
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+       // on method--> Defines what happens when bluetooth is turned on
     public void on(View view){
-        if (!myBluetoothAdapter.isEnabled()) {
-            Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        if (!myBluetoothAdapter.isEnabled()) { // if bluetooth is not already on/enabled --> request permission to turn it on
+            Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);// make an new intent that turn on the BluetoothAdapter and
+                                                                                     // and requests permission to turn it on
             startActivityForResult(turnOnIntent, REQUEST_ENABLE_BT);
 
-            Toast.makeText(getApplicationContext(),"Bluetooth turned on" ,
+            Toast.makeText(getApplicationContext(),"Bluetooth turned on" ,// if permission is granted, inform user that bluetooth is on
                     Toast.LENGTH_LONG).show();
         }
         else{
-            Toast.makeText(getApplicationContext(),"Bluetooth is already on",
+            Toast.makeText(getApplicationContext(),"Bluetooth is already on", // ... self exaplanatory
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -482,13 +511,15 @@ public class MainActivity extends ActionBarActivity {
         // TODO Auto-generated method stub
         if(requestCode == REQUEST_ENABLE_BT){
             if(myBluetoothAdapter.isEnabled()) {
-                text.setText("Status: Enabled");
+                bluetooth_status.setText("Status: Enabled");
             } else {
-                text.setText("Status: Disabled");
+                bluetooth_status.setText("Status: Disabled");
             }
         }
     }
 
+
+    // list device method: --> list current connect devices....
     public void list(View view){
         // get paired devices
         pairedDevices = myBluetoothAdapter.getBondedDevices();
@@ -502,42 +533,73 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+
+    // this is the important section that defines the Bluetooth Device and receive section;
+    // THsi is where : if a bluetooth device is found is can be paired ow added to a list of devices connected...(ListView Component)
     final BroadcastReceiver bReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            // When discovery finds a device
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // add the name and the MAC address of the object to the arrayAdapter
-                BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                BTArrayAdapter.notifyDataSetChanged();
-            }
+
+                // When discovery finds a device
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {  // if a bluetooth device is found do stuff
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);  // create new bloothooth object and get its info
+
+
+
+                    // The below two line are for a testing purposes only...
+                   // Toast.makeText(getApplicationContext(), "Searching for device...", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), device.getName() + "\n" + device.getAddress(), Toast.LENGTH_LONG).show();
+
+                    // add the name and the MAC address of the object to the arrayAdapter
+                    BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    BTArrayAdapter.notifyDataSetChanged();
+
+
+                    // for testing only
+                    //String test="This is a test for the bt list";
+
+                    //add the device and info to a list
+                    bt_dev_list.add(device.getName() + "\n" + device.getAddress());
+
+                }
+                // This doesnt work correctly for some reason--> if a blue tooth devices is found the above works, but if a bluetooth device is not found, then it does nothing
+                // it is very strange --> needs debugging...
+                else if(BluetoothDevice.ACTION_FOUND.isEmpty()) bt_dev_list.add("Bluetooth scan found no device. Please try again!");
+                Toast.makeText(getApplicationContext(), "Tesing no device found", Toast.LENGTH_LONG).show();
+
         }
     };
 
-    public void find(View view) {
-        if (myBluetoothAdapter.isDiscovering()) {
-            // the button is pressed when it discovers, so cancel the discovery
-            myBluetoothAdapter.cancelDiscovery();
-        }
-        else {
-            BTArrayAdapter.clear();
-            myBluetoothAdapter.startDiscovery();
 
+    // method to find the Bluetooth devices:
+    public void find(View view) {
+        if (myBluetoothAdapter.isDiscovering()) { // if discovery is already in progress cancel disovery as you cant initialize discovery of the device is already searching
+            // the button is pressed when it discovers, so cancel the discovery
+            myBluetoothAdapter.cancelDiscovery(); // cancel discovery
+        }
+        else {  // if there is a current search for devices...
+            BTArrayAdapter.clear();/// clear the list of discovered devices
+            myBluetoothAdapter.startDiscovery(); // start searching again
+
+
+            // this is a call the register device method above: if a bluetooth device is found
             registerReceiver(bReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         }
     }
 
+    // turn off bluetooth
     public void off(View view){
         myBluetoothAdapter.disable();
-        text.setText("Status: Disconnected");
+        bluetooth_status.setText("Status: Disconnected");
 
         Toast.makeText(getApplicationContext(),"Bluetooth turned off",
                 Toast.LENGTH_LONG).show();
     }
 
     @Override
+    
+    //the onDestroy method --> the app crashed or if the app close the registered reciver:-- this does not deregister devices, simply close the receiver to it.
     protected void onDestroy() {
         // TODO Auto-generated method stub
         super.onDestroy();
