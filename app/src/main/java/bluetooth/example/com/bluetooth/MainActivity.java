@@ -36,6 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private Button offBtn;
     private Button listBtn;
     private Button findBtn;
+    private Button graph;
     private TextView text;
     private BluetoothAdapter myBluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
@@ -126,7 +127,14 @@ public class MainActivity extends ActionBarActivity {
         select_val_list = (ListView)findViewById(R.id.listView_selectData); // this is the listview that will contain data from "static_dat_list" above
         myListView1= (ListView)findViewById(R.id.listView1); //lsit view that displays the bluetooth device that were found during the search
         bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
-
+        // button to get to the graph activity (Screen)
+        graph = (Button)findViewById(R.id.to_graph);
+        graph.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    setContentView(R.layout.activity_graph);
+            }
+        });
 
         // Define a new Adapter
         // First parameter - Context
@@ -598,7 +606,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
-    
+
     //the onDestroy method --> the app crashed or if the app close the registered reciver:-- this does not deregister devices, simply close the receiver to it.
     protected void onDestroy() {
         // TODO Auto-generated method stub

@@ -175,4 +175,14 @@
         android:layout_toRightOf="@+id/toggleButton_bluetooth"
         android:layout_toEndOf="@+id/toggleButton_bluetooth" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="graph"
+        android:id="@+id/to_graph"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/toggleButton_sound"
+        android:layout_toStartOf="@+id/toggleButton_sound" />
+
 </RelativeLayout>

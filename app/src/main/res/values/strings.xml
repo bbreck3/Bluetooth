@@ -10,8 +10,9 @@
     <string name="List">List Device</string>
     <string name="Find">Search</string>
     <string name="title_activity_splash">splash</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="hello_world">This is the screen where the Graph will go</string>
     <string name="Loading">Loading...</string>
     <string name="LoadVal"></string>
+    <string name="title_activity_graph">graph</string>
 
 </resources>
