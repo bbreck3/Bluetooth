@@ -168,11 +168,11 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                String dig_temp = ": 10";
+
                 String pound_temp = ": 1";
-                dig_volt.append(dig_temp);
+               // dig_volt.append(dig_temp);
                 pound.append(pound_temp);
-                listdata.add(dig_volt.getText().toString() + " : " + pound.getText().toString() );
+                listdata.add(pound.getText().toString() );
                 static_data_list.add(pound.getText().toString());
                 //  rec_data_list.addView(listdata);
             }
