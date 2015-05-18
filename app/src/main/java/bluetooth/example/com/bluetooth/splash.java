@@ -75,7 +75,7 @@ public class splash extends ActionBarActivity {
 
                 finish(); // after 10 seconds --> stop the current activity
             }
-        }, secondsDelayed * 10000); //--> how long to delay the activity -- by multiplying the secondsDelayed(defined as 1 above) by 10000 the duration is set to 10000 or 10 seconds
+        }, secondsDelayed * 1000); //--> how long to delay the activity -- by multiplying the secondsDelayed(defined as 1 above) by 10000 the duration is set to 10000 or 10 seconds
 
 
         /**

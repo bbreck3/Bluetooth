@@ -125,7 +125,9 @@
         android:layout_toEndOf="@+id/btn_records"
         android:layout_alignBottom="@+id/search"
         android:layout_toRightOf="@+id/btn_records"
-        android:choiceMode="singleChoice" />
+        android:choiceMode="singleChoice"
+        android:visibility="invisible"
+        android:stackFromBottom="true" />
 
     <ListView
         android:layout_width="wrap_content"

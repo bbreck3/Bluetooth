@@ -10,15 +10,18 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +31,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.widget.CompoundButton;
 import android.app.AlertDialog;
+import android.widget.AdapterView.OnItemClickListener;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -59,6 +63,14 @@ public class MainActivity extends ActionBarActivity {
     private ListView  myListView1;
     //my attempt to use a time delay --> while searching for devices : if none found to make a output that says no devices found please try again.... --> doesnt work correctly
     final int secondsDelayed = 1;
+    Context main_activity;
+
+    // The follow 5  lines are for the blueooth pairing capability in app (programmatically)
+    private BluetoothAdapter mBtAdapter;
+    private ArrayAdapter<String> mPairedDevicesArrayAdapter;
+    private ArrayAdapter<String> mNewDevicesArrayAdapter;
+    public BluetoothDevice btDevice;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +139,10 @@ public class MainActivity extends ActionBarActivity {
         select_val_list = (ListView)findViewById(R.id.listView_selectData); // this is the listview that will contain data from "static_dat_list" above
         myListView1= (ListView)findViewById(R.id.listView1); //lsit view that displays the bluetooth device that were found during the search
         bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
+
+        //contect of the main activity
+        main_activity = this;
+
         // button to get to the graph activity (Screen)
         graph = (Button)findViewById(R.id.to_graph);
         graph.setOnClickListener(new OnClickListener() {
@@ -204,12 +220,6 @@ public class MainActivity extends ActionBarActivity {
         rec_data_list.setAdapter(data_adapter);
         select_val_list.setAdapter(select_adapter);
 
-
-        /*
-
-
-
-
         /**
 
 
@@ -249,6 +259,127 @@ public class MainActivity extends ActionBarActivity {
             }
 
         });
+
+
+        /**
+         *
+         *      Bluetooth ListView on Click Listener
+         *
+         *       Bellow dediens the onlicklistner fo the bluetooth listview.
+         *
+         *       when an item in the bluetooth list view is selected: the onclick listnerer definced below is triggered.
+         *
+         *       When it is triggered is grab the cuurent object selected and opens a dialog the prompt the user for a password. This password
+         *       will be the bluetooth pairing password.
+         *
+         *       In other words , rather than the user havingto go into the android settings, the can now pair a device from the app....
+         */
+
+       myListView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                // ListView Clicked item index
+                int itemPosition = position;
+               // ListView Clicked item value
+                final String itemValue = (String)myListView1.getItemAtPosition(position);
+
+                /**
+                 *
+                 *      Pair Bluetoth Device Programmatically:
+                 *      Ignore this section as I found another easier way to do it:
+                 *      :
+                 *
+                 *
+                 */
+
+                /**
+                 *
+                 *
+                 *      Below is the Alert Dialog that Allow the user to input the bluetooth Device Pin from with the app.
+                 *
+                 */
+
+                // Define the EditText result variable to hold the result of the user input
+
+                // EditText result = (EditText)findViewById(R.id.editTextDialogUserInput);
+                // get prompts.xml view
+
+             /*  LayoutInflater li = LayoutInflater.from(main_activity);
+                View promptsView = li.inflate(R.layout.prompts, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        main_activity);
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+                final TextView dev_name_mess = (TextView)findViewById(R.id.pair_mess);
+                final TextView dev_name_prompt = (TextView)findViewById(R.id.pair_mess_dev_name);
+                final TextView dev_pin_mess = (TextView)findViewById(R.id.pair_mess_dev_pin);
+
+                final EditText userInput = (EditText) promptsView
+                        .findViewById(R.id.editTextDialogUserInput);
+
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+
+
+
+
+
+
+
+
+                                       // dev_name_prompt.setText(itemValue);
+
+                                        // get user input and set it to result
+                                        // edit text
+
+                                        //This test worked successfully
+                                        //Now that can grab user inout from the app -- >we can use this to askk for the bluetooth password return the password
+                                        // programmatically ans the use the store password to pair a new bluetooth device with in the app....
+                                        // password is the value the user input --> this variable is now the bluetooth pairing password.....
+                                        password = userInput.getText().toString();
+
+
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                // create alert dialog
+                AlertDialog bt_pair = alertDialogBuilder.create();
+
+                // show it
+                bt_pair.show();*/
+
+
+
+              /*  Toast.makeText(getApplicationContext(),
+                        "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
+                        .show();*/
+
+            }
+
+        });
+
+
+
+
+
+
+
 
 
 
@@ -554,30 +685,75 @@ public class MainActivity extends ActionBarActivity {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);  // create new bloothooth object and get its info
 
 
-
-                    // The below two line are for a testing purposes only...
-                   // Toast.makeText(getApplicationContext(), "Searching for device...", Toast.LENGTH_LONG).show();
-                    //Toast.makeText(getApplicationContext(), device.getName() + "\n" + device.getAddress(), Toast.LENGTH_LONG).show();
-
                     // add the name and the MAC address of the object to the arrayAdapter
                     BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+
                     BTArrayAdapter.notifyDataSetChanged();
 
-
-                    // for testing only
-                    //String test="This is a test for the bt list";
-
+                    //pairs the bluetooth device
+                    pairDevice(device);
                     //add the device and info to a list
                     bt_dev_list.add(device.getName() + "\n" + device.getAddress());
 
                 }
                 // This doesnt work correctly for some reason--> if a blue tooth devices is found the above works, but if a bluetooth device is not found, then it does nothing
                 // it is very strange --> needs debugging...
-                else if(BluetoothDevice.ACTION_FOUND.isEmpty()) bt_dev_list.add("Bluetooth scan found no device. Please try again!");
-                Toast.makeText(getApplicationContext(), "Tesing no device found", Toast.LENGTH_LONG).show();
+                else if(BluetoothDevice.ACTION_FOUND.isEmpty())
+                    //bt_dev_list.add("Bluetooth scan found no device. Please try again!");
+                Toast.makeText(getApplicationContext(), "Bluetooth scan found no device. Please try again!", Toast.LENGTH_LONG).show();
 
         }
     };
+
+
+
+    private void pairDevice(BluetoothDevice device) {
+        try {
+            Method method = device.getClass().getMethod("createBond", (Class[]) null);
+            method.invoke(device, (Object[]) null);
+
+
+            /**
+             *
+             *
+             *
+             *      If nore this section: THis is me tinkering with something
+             */
+                //device.notify();
+               //device.createBond();
+
+               // int bond_state = device.getBondState();
+
+
+            /**
+             *          Does Not Work
+             *
+             *
+             */
+           /*switch (device.getBondState()){
+                case 12:  Toast.makeText(getApplicationContext(),"Device Paired!",Toast.LENGTH_LONG).show();
+                        break;
+                case 11:  Toast.makeText(getApplicationContext(),"Pairing Paired!",Toast.LENGTH_LONG).show();
+                    break;
+                case 10: Toast.makeText(getApplicationContext(),"Device Paired!",Toast.LENGTH_LONG).show();
+                        break;
+
+            }*/
+           /* if(device.getBondState()==device.BOND_BONDED){
+                Toast.makeText(getApplicationContext(),"Device Paired!",Toast.LENGTH_LONG).show();
+            }
+            else if(device.getBondState()==device.BOND_BONDING){
+                Toast.makeText(getApplicationContext(),"Pairing...",Toast.LENGTH_LONG).show();
+            }
+            else if(device.getBondState()==device.BOND_NONE){
+                Toast.makeText(getApplicationContext(),"Error Please try Again!",Toast.LENGTH_LONG).show();
+            }*/
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     // method to find the Bluetooth devices:
