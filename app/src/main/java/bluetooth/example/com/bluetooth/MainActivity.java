@@ -3,18 +3,29 @@ package bluetooth.example.com.bluetooth;
 import android.content.DialogInterface;
 import android.hardware.camera2.TotalCaptureResult;
 import android.os.Handler;
+import android.os.ParcelUuid;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
+
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.v7.internal.app.ToolbarActionBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -65,12 +76,19 @@ public class MainActivity extends ActionBarActivity {
     final int secondsDelayed = 1;
     Context main_activity;
 
-    // The follow 5  lines are for the blueooth pairing capability in app (programmatically)
+    // The follow lines are for the blueooth pairing capability in app (programmatically)
     private BluetoothAdapter mBtAdapter;
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     public BluetoothDevice btDevice;
+    private BluetoothSocket socket;
+    private BluetoothSocket  temp;
     private String password;
+    private String MAC_temp, MAC;
+
+   // private final InputStream mmInStream;
+    //private final OutputStream mmOutStream;
+    byte[] buffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +219,7 @@ public class MainActivity extends ActionBarActivity {
          *                    to set the text in order to update a textview: <name of textview>.setText(<put you text here)>)
          *
          */
+
         rec_data.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -500,7 +519,12 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
-                    list(v);
+                   try {
+                       list(v);
+                   }catch(Exception e){
+                       e.printStackTrace();
+                   }
+
                 }
             });
 
@@ -510,11 +534,10 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) { // if bluetooth is not on and a search is intitiated inform user to turn on bluetooth before searching for device
                     // TODO Auto-generated method stub
-                    if(!myBluetoothAdapter.isEnabled()){ // if the bluetooth is not on, prompt user to turn bluetooth on before search for devices
-                        Toast.makeText(getApplicationContext(),"Please turn on BlueTooth before searching.",Toast.LENGTH_LONG).show();
-                    }
-                    else //bluetooth is on so search for device --> with the find method
-                    find(v);
+                    if (!myBluetoothAdapter.isEnabled()) { // if the bluetooth is not on, prompt user to turn bluetooth on before search for devices
+                        Toast.makeText(getApplicationContext(), "Please turn on BlueTooth before searching.", Toast.LENGTH_LONG).show();
+                    } else //bluetooth is on so search for device --> with the find method
+                        find(v);
                 }
             });
 
@@ -659,23 +682,29 @@ public class MainActivity extends ActionBarActivity {
 
 
     // list device method: --> list current connect devices....
-    public void list(View view){
+    public void list(View view) throws IOException{
         // get paired devices
         pairedDevices = myBluetoothAdapter.getBondedDevices();
 
         // put it's one to the adapter
-        for(BluetoothDevice device : pairedDevices)
+        for (BluetoothDevice device : pairedDevices) {
+            String mac = device.getAddress();
+            if (mac.equals("0C:20:13:12:11:A1")) {
+                    createSocket(device);
+            }
             BTArrayAdapter.add(device.getName()+ "\n" + device.getAddress());
 
-        Toast.makeText(getApplicationContext(),"Show Paired Devices",
-                Toast.LENGTH_SHORT).show();
 
+            Toast.makeText(getApplicationContext(), "Show Paired Devices",
+                    Toast.LENGTH_SHORT).show();
+
+        }
     }
 
 
     // this is the important section that defines the Bluetooth Device and receive section;
     // THsi is where : if a bluetooth device is found is can be paired ow added to a list of devices connected...(ListView Component)
-    final BroadcastReceiver bReceiver = new BroadcastReceiver() {
+    final BroadcastReceiver bReceiver = new BroadcastReceiver(){
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
@@ -689,9 +718,45 @@ public class MainActivity extends ActionBarActivity {
                     BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
 
                     BTArrayAdapter.notifyDataSetChanged();
+                      // MAC_temp = device.getAddress();  //my test device --> "0C:20:13:12:11:A1"
+                    MAC_temp = "0C:20:13:12:11:A1";
+
+                    //TEst ALptop: MAC:    C0:14:3D:C0:D1:BE
 
                     //pairs the bluetooth device
-                    pairDevice(device);
+                    if(device.getAddress().equals("0C:20:13:12:11:A1")) {
+                           // MAC = MAC_temp;
+                       // ParcelUuid[] uuids = device.getUuids();
+                        //for(ParcelUuid  uuid: uuids){
+                          //  Toast.makeText(getApplicationContext(),"UUid: " + uuid.getUuid().toString(),Toast.LENGTH_LONG).show();
+                        //}
+
+
+
+                    try{
+
+                        pairDevice(device);
+                       // int pair_state = device.getBondState();
+                        String pair_state;//= Integer.toString(device.getBondState());
+
+
+
+                       /**while((device.getBondState()==11)){
+                             pair_state= Integer.toString(device.getBondState());
+                           // Toast.makeText(getApplicationContext(), "not paired yet.....", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), pair_state, Toast.LENGTH_LONG).show();
+                        }
+                        if(device.getBondState()==12){
+                            pair_state= Integer.toString(device.getBondState());
+                            Toast.makeText(getApplicationContext(), pair_state, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "success...", Toast.LENGTH_LONG).show();
+                        }*/
+                        //createSocket(device);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
                     //add the device and info to a list
                     bt_dev_list.add(device.getName() + "\n" + device.getAddress());
 
@@ -704,6 +769,54 @@ public class MainActivity extends ActionBarActivity {
 
         }
     };
+
+    private void createSocket(BluetoothDevice device)throws IOException {
+        final UUID dev_uuid = UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB");
+        Toast.makeText(getApplicationContext(), "TEst", Toast.LENGTH_LONG).show();
+
+        BluetoothSocket temp = null;
+        try {
+
+            temp = device.createRfcommSocketToServiceRecord(dev_uuid);
+
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            //Log.d(TAG,"socket not created");
+            e1.printStackTrace();
+        }
+
+        socket = temp;
+
+        Thread connectionThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+               
+                //try yo connect to device
+                try {
+                    socket.connect();
+                } catch (IOException e) {
+                    try {
+
+                        //Toast.makeText(getApplicationContext(),"IO Exception before clossing socket..", Toast.LENGTH_LONG).show();
+                        //failed to connect to device so close the socket
+                        socket.close();
+
+                        e.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+
+                }
+             }
+        });
+
+        connectionThread.start();
+        Toast.makeText(getApplicationContext(),"Started Thread...",Toast.LENGTH_LONG).show();
+
+
+
+
+    }
 
 
 
@@ -719,8 +832,9 @@ public class MainActivity extends ActionBarActivity {
              *
              *      If nore this section: THis is me tinkering with something
              */
-                //device.notify();
-               //device.createBond();
+                  device.notify();
+               device.createBond();
+
 
                // int bond_state = device.getBondState();
 
