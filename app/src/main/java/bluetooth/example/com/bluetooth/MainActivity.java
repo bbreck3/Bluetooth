@@ -20,6 +20,7 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -107,6 +108,8 @@ public class MainActivity extends ActionBarActivity {
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub
            // Log.i("tag", "in handler");
+
+            Toast.makeText(getApplicationContext(),"Reached message Handler", Toast.LENGTH_LONG).show();
             super.handleMessage(msg);
             switch(msg.what){
                 case SUCCESS_CONNECT:
@@ -657,51 +660,109 @@ public class MainActivity extends ActionBarActivity {
         }
     };
 //creat socket and for device
-    private void createSocket(BluetoothDevice device)throws IOException {
-        final UUID dev_uuid = UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB");
+    private void createSocket(BluetoothDevice device)throws IOException, NoSuchElementException {
+       final UUID dev_uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+        //final UUID dev_uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
         Toast.makeText(getApplicationContext(), "Reached Creating Socket", Toast.LENGTH_LONG).show();
 
         InputStream iStream = null;
         OutputStream oStream = null;
-
+        BluetoothDevice test_dev;
 
         try {
 
+            //temp = device.createRfcommSocketToServiceRecord(dev_uuid);
             temp = device.createRfcommSocketToServiceRecord(dev_uuid);
 
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             //Log.d(TAG,"socket not created");
             e1.printStackTrace();
-           // Log.i("Tag", "get socket failed");
+            Log.e("", "Error Creating Socket");
         }
 
         socket = temp;
        String test= socket.toString();
+       test_dev = socket.getRemoteDevice();
         Toast.makeText(getApplicationContext(), "socket: " + test, Toast.LENGTH_LONG).show();
-        connectSocket(socket);
+        Toast.makeText(getApplicationContext(), "socket Dev : " + test_dev, Toast.LENGTH_LONG).show();
+        connectSocket(socket, device);
     }
 
-    public void connectSocket(BluetoothSocket socket) {
-        try{
+    public void connectSocket(BluetoothSocket socket, BluetoothDevice device)  throws IOException{
+        myBluetoothAdapter.cancelDiscovery();
+        boolean success;
+        BluetoothSocket fallbackSocket;
+        InputStream tmpIn = null;
+        OutputStream tmpOut = null;
+        try {
             socket.connect();
+
+
+            tmpIn = socket.getInputStream();
+            tmpOut = socket.getOutputStream();
+            Boolean conection_test = socket.isConnected();
+            Toast.makeText(getApplicationContext(), "Socket connection status" + conection_test, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Input" + tmpIn, Toast.LENGTH_LONG).show();
+
+            // mHandler.obtainMessage(SUCCESS_CONNECT);
             Toast.makeText(getApplicationContext(), "Socket Connected", Toast.LENGTH_LONG).show();
+
+            /**
+             *      This causes the app to crash: but now that socket is successfully connect Thus must work inorder to grab input from the bluetooth device
+             *      over the socket....
+             *
+             */
+            //ConnectedThread my_thread = new ConnectedThread(socket);
+            //my_thread.run();
+
+
+           // mHandler.obtainMessage(SUCCESS_CONNECT);
+
+
             //  Log.i("Tag", "connect-run");
         } catch (IOException e) {
-            //
-            //
-            //unable to connect' close the socket and get out
+            Log.e("", e.getMessage());
+            e.printStackTrace();
             try {
+
                 socket.close();
-                Toast.makeText(getApplicationContext(), "Socket unable to connect", Toast.LENGTH_LONG).show();
 
-            } catch (IOException e1) {
+               /* Method m = device.getClass().getMethod("createRfcommSocket",
+                        new Class[] { int.class });
+                BluetoothSocket mySocket = (BluetoothSocket) m.invoke(device, Integer.valueOf(1));
+                mySocket.connect();*/
 
-                return;
+
+                /*tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+                Boolean conection_test = socket.isConnected();
+                Toast.makeText(getApplicationContext(), "Socket connection status" + conection_test, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Input" + tmpIn, Toast.LENGTH_LONG).show();
+
+                // mHandler.obtainMessage(SUCCESS_CONNECT);
+                Toast.makeText(getApplicationContext(), "Socket Connected", Toast.LENGTH_LONG).show();
+                mHandler.obtainMessage(SUCCESS_CONNECT);*/
+
+                /*Class<?> clazz = socket.getRemoteDevice().getClass();
+                Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
+
+                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                Object[] params = new Object[]{Integer.valueOf(1)};
+
+                fallbackSocket = (BluetoothSocket) m.invoke(socket.getRemoteDevice(), params);
+                fallbackSocket.connect();*/
+            } catch (Exception e1) {
+               // socket.close();
+
+                Log.e("", e1.getMessage());
+                e1.printStackTrace();
             }
 
+
         }
-}
+    }
+
 
 
 
@@ -732,12 +793,13 @@ public class MainActivity extends ActionBarActivity {
             int bytes; // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
+            while (socket.isConnected()) {
                 try {
                     // Read from the InputStream
                     buffer = new byte[1024];
                     bytes = mmInStream.read(buffer);
                     // Send the obtained bytes to the UI activity
+                    Toast.makeText(getApplicationContext(),"Input: " + bytes, Toast.LENGTH_LONG).show();
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
 
@@ -761,6 +823,12 @@ public class MainActivity extends ActionBarActivity {
             } catch (IOException e) { }
         }
     }
+
+
+
+
+
+
 
     private void pairDevice(BluetoothDevice device) {
         try {
