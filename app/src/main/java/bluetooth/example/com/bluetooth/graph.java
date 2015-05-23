@@ -1,9 +1,15 @@
 package bluetooth.example.com.bluetooth;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+import android.view.View.*;
 
 
 public class graph extends ActionBarActivity {
@@ -11,7 +17,13 @@ public class graph extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_graph);
+       setContentView(R.layout.activity_graph);
+
+
+
+
+
+
     }
 
 
@@ -36,4 +48,11 @@ public class graph extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+
+
+
 }
