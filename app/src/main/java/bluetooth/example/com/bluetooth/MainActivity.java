@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -45,6 +46,10 @@ import android.net.Uri;
 import android.widget.CompoundButton;
 import android.app.AlertDialog;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -77,6 +82,8 @@ public class MainActivity extends ActionBarActivity {
     //my attempt to use a time delay --> while searching for devices : if none found to make a output that says no devices found please try again.... --> doesnt work correctly
     final int secondsDelayed = 1;
     Context main_activity;
+
+    Toast toast;
 
     // The follow lines are for the blueooth pairing capability in app (programmatically)
     private BluetoothAdapter mBtAdapter;
@@ -442,32 +449,33 @@ public class MainActivity extends ActionBarActivity {
 
             listBtn.setEnabled(false);
             findBtn.setEnabled(false);
-           bluetooth_status.setText("Status: not supported");
-
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
                     Toast.LENGTH_LONG).show();
+           //bluetooth_status.setText("Status: not supported");
+
+
         } else {
             toggleButton_bluetooth = (ToggleButton)findViewById(R.id.toggleButton_bluetooth);  // sets up the blootooth toggle( the on / off button below status in the app
             //text = (TextView) findViewById(R.id.bluetooth_status); //not important but keep incase it was needed in the future
-
 
             // defines the onclick listener for the bluetooth toggle: what happend if the toggle is in the "ON" or "OFF" state
 
             toggleButton_bluetooth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) { // if "ON" State --> change the status to enabled
-                       bluetooth_status.setText("Enabled");
+                      // bluetooth_status.setText("Enabled");
                         // The toggle is enabled
                         if (!myBluetoothAdapter.isEnabled()) {  // if "ON" state and bluetooth is currently off, Request permission to enable, if accepted turn bluetooth on
                             Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             startActivityForResult(turnOnIntent, REQUEST_ENABLE_BT);
 
-                            Toast.makeText(getApplicationContext(), "Bluetooth turned on", //once blue tooth has been turned on, inform the user with a subtly display
-                                    Toast.LENGTH_LONG).show();
+                           Toast.makeText(getApplicationContext(), "Bluetooth turned on", //once blue tooth has been turned on, inform the user with a subtly display
+                                    Toast.LENGTH_LONG);
 
                             Toast.makeText(getApplicationContext(), "Searching for devices...", // inform the user that a search for bluetooth devices is in progress
                                     Toast.LENGTH_LONG).show();
                            ;
+
 
 
                         } else { // if blue tooth functionality is already state is switched to in" inform user that is is already on and inform use that the search for bluetooth devices is in progress
@@ -476,12 +484,13 @@ public class MainActivity extends ActionBarActivity {
 
                             Toast.makeText(getApplicationContext(), "Searching for devices...",
                                     Toast.LENGTH_LONG).show();
+                            find(buttonView);
                         }
 
                     }
                     if(!isChecked){ // if the state is turned  to "OFF" chnage the status to Disabled and turn of bluetooth
 
-                       bluetooth_status.setText("Disabled");
+                      //bluetooth_status.setText("Disabled");
                         myBluetoothAdapter.disable(); //disable the addapter
 
                     }
@@ -587,6 +596,29 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        /**
+         *
+         *
+         *      The below section is where the graph will go
+         *
+         */
+
+
+        GraphView graph = (GraphView)findViewById(R.id.graph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+
+                new DataPoint(0, 1),
+                new DataPoint(1, 5),
+                new DataPoint(2, 3),
+                new DataPoint(3, 2),
+                new DataPoint(4, 6)
+
+
+        });
+
+
+        graph.addSeries(series);
+
     } // end onCreate method
 
     /***
@@ -622,9 +654,12 @@ public class MainActivity extends ActionBarActivity {
         // TODO Auto-generated method stub
         if(requestCode == REQUEST_ENABLE_BT){
             if(myBluetoothAdapter.isEnabled()) {
-                bluetooth_status.setText("Status: Enabled");
+                Toast.makeText(getApplicationContext(),"Bluetooth Enabled", Toast.LENGTH_SHORT).show();
+               // bluetooth_status.setText("Status: Enabled");
             } else {
-                bluetooth_status.setText("Status: Disabled");
+
+                Toast.makeText(getApplicationContext(),"Bluetooth Enabled", Toast.LENGTH_SHORT).show();
+               // bluetooth_status.setText("Status: Disabled");
             }
         }
     }
@@ -922,12 +957,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     // turn off bluetooth
-    public void off(View view){
+    public void off(View view) {
         myBluetoothAdapter.disable();
-        bluetooth_status.setText("Status: Disconnected");
+        Toast.makeText(getApplicationContext(), "Bluetooth Disconnected", Toast.LENGTH_SHORT).show();
+        //bluetooth_status.setText("Status: Disconnected");
 
-        Toast.makeText(getApplicationContext(),"Bluetooth turned off",
-                Toast.LENGTH_LONG).show();
     }
 
     @Override

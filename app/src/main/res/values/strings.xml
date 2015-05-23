@@ -13,6 +13,9 @@
     <string name="hello_world">This is the screen where the Graph will go</string>
     <string name="Loading">Loading...</string>
     <string name="LoadVal"></string>
+    <string name="toggle_button_bluetooth">Bluetooth</string>
+    <string name="toggle_button_sound">Sound</string>
     <string name="title_activity_graph">graph</string>
+
 
 </resources>
