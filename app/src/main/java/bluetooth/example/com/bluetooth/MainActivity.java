@@ -1,11 +1,10 @@
 package bluetooth.example.com.bluetooth;
 
+import android.app.Activity;
 import android.content.DialogInterface;
-import android.hardware.camera2.TotalCaptureResult;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelUuid;
-import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
@@ -16,7 +15,6 @@ import android.content.Context;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,17 +24,14 @@ import java.util.UUID;
 
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -45,18 +40,18 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.widget.CompoundButton;
 import android.app.AlertDialog;
-import android.widget.AdapterView.OnItemClickListener;
+
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
     private static final int REQUEST_ENABLE_BT = 1;
     private Button onBtn;
     private Button offBtn;
-    private Button listBtn;
+    private Button list_paired;
     private Button findBtn;
     private Button graph;
     private TextView text;
@@ -84,6 +79,9 @@ public class MainActivity extends ActionBarActivity {
     Context main_activity;
 
     Toast toast;
+
+
+    private Spinner spinner;
 
     // The follow lines are for the blueooth pairing capability in app (programmatically)
     private BluetoothAdapter mBtAdapter;
@@ -116,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
             // TODO Auto-generated method stub
            // Log.i("tag", "in handler");
 
-            Toast.makeText(getApplicationContext(),"Reached message Handler", Toast.LENGTH_LONG).show();
+           // Toast.makeText(getApplicationContext(),"Reached message Handler", Toast.LENGTH_LONG).show();
             super.handleMessage(msg);
             switch(msg.what){
                 case SUCCESS_CONNECT:
@@ -188,6 +186,13 @@ public class MainActivity extends ActionBarActivity {
         //list of the pounds only --> to be used for selection if selected a specific pound measurement as apposed to taing in from the input at the top
         // --> also to be integrated with the toggle on / off sound
          final ArrayList<String> static_data_list = new ArrayList<String>();
+            //Add values to the list --> preset pound values that can be selected form if not taken from microcontroller bluetooth input...
+        static_data_list.add("1");
+        static_data_list.add("3");
+        static_data_list.add("5");
+        static_data_list.add("6");
+        static_data_list.add("7");
+        static_data_list.add("8");
 
 
 
@@ -199,15 +204,18 @@ public class MainActivity extends ActionBarActivity {
         */
 
 
+
+
             // basis textview and buttons setup
         dig_volt = (TextView)findViewById(R.id.textViewVolt); // this is the text view that reads "Voltge" on the app
         pound = (TextView)findViewById(R.id.textView_Pounds); // this is the textView that reads "Pounds" in the app
         rec_data = (Button)findViewById(R.id.btn_records); // this is the button the reads "RECORD DATA"
         rec_data_list = (ListView)findViewById(R.id.listView_Data); // this is the list view that will contain data from "listdata" above
-        select_val_list = (ListView)findViewById(R.id.listView_selectData); // this is the listview that will contain data from "static_dat_list" above
+        select_val_list = (ListView)findViewById(R.id.listView_selectData_1); // this is the listview that will contain data from "static_dat_list" above
         list_paired_dev= (ListView)findViewById(R.id.list_paired_dev); //lsit view that displays the bluetooth device that were found during the search
         bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
-
+        spinner = (Spinner)findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(this);
         //contect of the main activity
         main_activity = this;
 
@@ -250,6 +258,8 @@ public class MainActivity extends ActionBarActivity {
         // Select Value List View Adapter
         ArrayAdapter<String> select_adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1,static_data_list);
+        select_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         //Array adapter to add the bluetooth device list to the ListView --> this is wierd: thsi must be here to work, but the actual Adapter that workd and upadte the
         // bluetooth list is not this one...... --> DO NOT DELETE
         bt_dev_list_adapt = new ArrayAdapter<String>(this,
@@ -277,19 +287,14 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
 
-                String pound_temp = ": 1";
-               // dig_volt.append(dig_temp);
-                pound.append(pound_temp);
                 listdata.add(pound.getText().toString() );
-                static_data_list.add(pound.getText().toString());
-
             }
         });
 
         // Below : you must add the adapter to the lsit in order the add data to the listview from the arraylist
         // Assign adapter to ListView
         rec_data_list.setAdapter(data_adapter);
-        select_val_list.setAdapter(select_adapter);
+       spinner.setAdapter(select_adapter);
 
         /**
 
@@ -403,7 +408,7 @@ public class MainActivity extends ActionBarActivity {
 
          ListView Item Click Listener -- > Impliments Select VAlue ListView
           */
-        select_pound=(TextView)findViewById(R.id.textView_selectVal);
+        //select_pound=(TextView)findViewById(R.id.textView_selectVal);
         select_val_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -424,7 +429,7 @@ public class MainActivity extends ActionBarActivity {
                  */
 
                 String temp = itemValue;
-                select_pound.setText(temp);
+               // select_pound.setText(temp);
             }
 
         });
@@ -447,7 +452,7 @@ public class MainActivity extends ActionBarActivity {
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(myBluetoothAdapter == null) { // if device does not support bluetoot the display a not supported message
 
-            listBtn.setEnabled(false);
+            list_paired_dev.setEnabled(false);
             findBtn.setEnabled(false);
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
                     Toast.LENGTH_LONG).show();
@@ -504,8 +509,8 @@ public class MainActivity extends ActionBarActivity {
              *  listBtn --> Simply List devices that are currently paired: this already works button is hidden in the app as you did not want it
              *
              */
-            listBtn = (Button)findViewById(R.id.paired);
-            listBtn.setOnClickListener(new OnClickListener() {
+           list_paired = (Button)findViewById(R.id.paired);
+            list_paired.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -620,6 +625,27 @@ public class MainActivity extends ActionBarActivity {
         graph.addSeries(series);
 
     } // end onCreate method
+
+
+    //Methods to mplement the Spinner
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // On selecting a spinner item
+        String item = parent.getItemAtPosition(position).toString();
+
+        // Showing selected spinner item
+        Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
+
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        // TODO Auto-generated method stub
+
+    }
+
+
+
+
 
     /***
      *
@@ -868,6 +894,7 @@ public class MainActivity extends ActionBarActivity {
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+           // Handler mHandler;
 
             // Get the input and output streams, using temp objects because
             // member streams are final
@@ -882,20 +909,47 @@ public class MainActivity extends ActionBarActivity {
 
 
         public void run() {
+            BluetoothSocket mmSocket = socket;
+            final InputStream mmInStream;
+            final OutputStream mmOutStream;
+
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+            // Handler mHandler;
+
+            // Get the input and output streams, using temp objects because
+            // member streams are final
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) { }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+
+
+
             byte[] buffer;  // buffer store for the stream
             int bytes; // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs
 
                 try {
-                    // Read from the InputStream
-                    buffer = new byte[1024];
-                    bytes = mmInStream.read(buffer);
-                    // Send the obtained bytes to the UI activity
-                    //Toast.makeText(getApplicationContext(),"Input: " + bytes, Toast.LENGTH_SHORT).show();
-                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    Looper.prepare();
 
+                        // Read from the InputStream
+                        buffer = new byte[1024]; //byte[1024];
+                        bytes = mmInStream.read(buffer);
+
+
+                  // pound.setText("Pound: " +Integer.toString(bytes));
+
+
+                        // Send the obtained bytes to the UI activity
+                        //Toast.makeText(getApplicationContext(),"Input: " + bytes, Toast.LENGTH_SHORT).show();
+                       mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+                               .sendToTarget();
+                Looper.loop();
                 } catch (IOException e) {
                     e.printStackTrace();
 

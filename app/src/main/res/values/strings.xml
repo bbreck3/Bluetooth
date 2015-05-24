@@ -17,5 +17,15 @@
     <string name="toggle_button_sound">Sound</string>
     <string name="title_activity_graph">graph</string>
 
+    <string-array name="pound_list">
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+
+    </string-array>
+
 
 </resources>

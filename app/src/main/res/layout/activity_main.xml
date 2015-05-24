@@ -52,7 +52,6 @@
         android:layout_height="wrap_content"
         android:visibility="visible"
         android:text="Connect"
-        android:gravity="center_horizontal|left"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/bluetooth_status" />
 
@@ -88,23 +87,14 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Select Value"
-        android:id="@+id/textView_selectVal"
-        android:layout_alignBottom="@+id/btn_records"
-        android:layout_centerHorizontal="true" />
-
     <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/toggle_button_bluetooth"
         android:id="@+id/toggleButton_bluetooth"
         android:checked="false"
-        android:layout_below="@+id/bluetooth_status"
-        android:layout_alignEnd="@+id/textView_selectVal" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <ToggleButton
         android:layout_width="wrap_content"
@@ -122,13 +112,12 @@
         android:id="@+id/list_paired_dev"
         android:layout_alignRight="@+id/toggleButton_sound"
         android:layout_alignEnd="@+id/toggleButton_sound"
-        android:layout_toEndOf="@+id/btn_records"
+        android:layout_toEndOf="@+id/listView_Data"
         android:choiceMode="singleChoice"
         android:visibility="visible"
         android:stackFromBottom="true"
-        android:layout_alignStart="@+id/textView"
-        android:layout_alignBottom="@+id/listView_selectData"
-        android:layout_alignTop="@+id/textView_selectVal" />
+        android:layout_below="@+id/spinner"
+        android:layout_above="@+id/graph" />
 
     <ListView
         android:layout_width="wrap_content"
@@ -141,19 +130,18 @@
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/btn_records"
         android:layout_alignEnd="@+id/btn_records"
-        android:layout_alignBottom="@+id/listView_selectData" />
+        android:layout_above="@+id/textView" />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/listView_selectData"
-        android:layout_below="@+id/textView_selectVal"
+        android:id="@+id/listView_selectData_1"
         android:layout_toRightOf="@+id/listView_Data"
         android:layout_toStartOf="@+id/toggleButton_sound"
         android:choiceMode="singleChoice"
-        android:visibility="visible"
-        android:layout_alignEnd="@+id/textView_selectVal"
-        android:layout_above="@+id/textView" />
+        android:visibility="gone"
+        android:layout_above="@+id/textView"
+        android:layout_below="@+id/btn_records" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -228,6 +216,16 @@
         android:visibility="invisible"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner"
+        android:layout_below="@+id/linearLayout"
+        android:spinnerMode="dropdown"
+        android:layout_above="@+id/listView_Data"
+        android:layout_toEndOf="@+id/btn_records"
+        android:gravity="left" />
 
 
 </RelativeLayout>
