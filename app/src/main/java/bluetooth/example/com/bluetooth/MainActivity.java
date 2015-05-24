@@ -2,6 +2,7 @@ package bluetooth.example.com.bluetooth;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,6 +16,7 @@ import android.content.Context;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -94,6 +96,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     private String MAC_temp, MAC;
     protected static final int SUCCESS_CONNECT = 0;
     protected static final int MESSAGE_READ = 1;
+
+
+    //The following lines are for the thread..
+    ConnectedThread thread;
+    Button refresh;
 
    // private final InputStream mmInStream;
     //private final OutputStream mmOutStream;
@@ -216,6 +223,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         bluetooth_status = (TextView)findViewById(R.id.bluetooth_Status);// defines the status text view: "ENABLED" if bluetooth is on, "DISABLED" id it is off
         spinner = (Spinner)findViewById(R.id.spinner);
         spinner.setOnItemSelectedListener(this);
+        refresh = (Button)findViewById(R.id.refresh);
         //contect of the main activity
         main_activity = this;
 
@@ -230,6 +238,22 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             }
         });
 
+        /**
+         *
+         *      Refresh: onClickListener -->when cliked is the socket is connected --> run the thread again the get different values
+         *
+         */
+
+            refresh.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if(socket.isConnected()){
+                        thread.run();
+                    }
+
+                }
+            });
         // Define a new Adapter
         // First parameter - Context
         // Second parameter - Layout for the row
@@ -792,7 +816,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     }
 
     public void connectSocket(BluetoothSocket socket, BluetoothDevice device)  throws IOException{
+
         myBluetoothAdapter.cancelDiscovery();
+
+
         boolean success;
         BluetoothSocket fallbackSocket;
         InputStream tmpIn = null;
@@ -810,7 +837,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             // mHandler.obtainMessage(SUCCESS_CONNECT);
             Toast.makeText(getApplicationContext(), "Socket Connected", Toast.LENGTH_LONG).show();
 
-            ConnectedThread thread = new ConnectedThread(socket);
+          thread = new ConnectedThread(socket);
             thread.run();
 
 
@@ -935,10 +962,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             // Keep listening to the InputStream until an exception occurs
 
                 try {
-                    Looper.prepare();
+                   // Looper.prepare();
 
                         // Read from the InputStream
-                        buffer = new byte[1024]; //byte[1024];
+                        buffer = new byte[8096]; //byte[1024];
                         bytes = mmInStream.read(buffer);
 
 
@@ -949,8 +976,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                         //Toast.makeText(getApplicationContext(),"Input: " + bytes, Toast.LENGTH_SHORT).show();
                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                                .sendToTarget();
-                Looper.loop();
-                } catch (IOException e) {
+                         thread.sleep(1000);
+               // Looper.loop();
+                } catch (Exception e) {
+                        thread.run();
                     e.printStackTrace();
 
                 }

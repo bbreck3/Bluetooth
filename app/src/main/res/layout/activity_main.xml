@@ -224,8 +224,17 @@
         android:layout_below="@+id/linearLayout"
         android:spinnerMode="dropdown"
         android:layout_above="@+id/listView_Data"
-        android:layout_toEndOf="@+id/btn_records"
-        android:gravity="left" />
+        android:gravity="left"
+        android:layout_alignEnd="@+id/toggleButton_bluetooth"
+        android:layout_toEndOf="@+id/btn_records" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh"
+        android:id="@+id/refresh"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>
