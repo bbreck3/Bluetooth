@@ -145,6 +145,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                     int counter=0;
                    // int space_pos = test.indexOf(" ");
 
+
+                    /**
+                     *      This is an issue--> manually setting the substring position of the first_part and second_part
+                     *
+                     *      this needs to be generic
+                     *
+                     *
+                     */
                     first_part=test.substring(0,4);
                     second_part=test.substring(5,8);
                     pound.setText(first_part);
