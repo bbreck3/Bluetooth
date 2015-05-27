@@ -19,8 +19,10 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.PortUnreachableException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -101,6 +103,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     //The following lines are for the thread..
     ConnectedThread thread;
     Button refresh;
+    int run_counter =0;
 
     // private final InputStream mmInStream;
     //private final OutputStream mmOutStream;
@@ -136,14 +139,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                     byte[] readBuf = (byte[])msg.obj;
                     String string = new String(readBuf);
 
-                    String test = string;
+                    /*String test = string;
 
                     String first_part="";
                     String second_part="";
                     String space=" ";
                     String builder="";
                     int counter=0;
-                   // int space_pos = test.indexOf(" ");
+                   // int space_pos = test.indexOf(" ");*/
 
 
                     /**
@@ -153,9 +156,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                      *
                      *
                      */
-                    first_part=test.substring(0,4);
+                   /* first_part=test.substring(0,4);
                     second_part=test.substring(5,8);
-                    pound.setText(first_part);
+                    pound.setText("Pounds: " + first_part);
                     Toast.makeText(getApplicationContext(),test,Toast.LENGTH_LONG).show();
 
                     if(first_part.length()> second_part.length()){
@@ -187,16 +190,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
                         /*if (first_part.length() > second_part.length()) {
                             pound.setText("Pound: " + first_part);
-                        } else pound.setText("Pound: " + second_part);
+                        } else pound.setText("Pound: " + second_part);*/
 
-                        pound.setText("Pound: " + string);
+
                         //Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();*/
                         break;
 
             }
         }
     };
+public void onNothingSelected(AdapterView<?> parent){
 
+
+}
 
 
 
@@ -302,10 +308,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         refresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(socket.isConnected()){
+                thread.RUNN();
+               /* if(socket.isConnected()){
                     thread.run();
-                }
+                }*/
 
             }
         });
@@ -344,6 +350,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         bt_dev_list_adapt = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1,bt_dev_list);
 
+        // Below : you must add the adapter to the lsit in order the add data to the listview from the arraylist
+        // Assign adapter to ListView
+        rec_data_list.setAdapter(data_adapter);
+        spinner.setAdapter(select_adapter);
+
 
         /**
          *  Below defines the onclick lister event (what happend when you click the "RECORD DATA"  Button on the app
@@ -361,19 +372,18 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
          *
          */
 
-        rec_data.setOnClickListener(new OnClickListener(){
+        rec_data.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
 
-                listdata.add(pound.getText().toString() );
+                //testing pound tezt...
+                //pound.setText("test");
+                listdata.add(pound.getText().toString());
             }
         });
 
-        // Below : you must add the adapter to the lsit in order the add data to the listview from the arraylist
-        // Assign adapter to ListView
-        rec_data_list.setAdapter(data_adapter);
-        spinner.setAdapter(select_adapter);
+
 
         /**
 
@@ -463,6 +473,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
                 // pairedDevices = myBluetoothAdapter.getBondedDevices();
 
+
+
+
                 // put it's one to the adapter
                 for (BluetoothDevice device : pairedDevices) {  // loop through all paired devices to find a match
                     String mac = device.getAddress(); // grab the mac of the current device in loop
@@ -479,6 +492,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
             }
         });
+
+
+
 
          /*
                 Another list view: For select...
@@ -595,7 +611,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
                     try {
-                        list(v);
+                        //list(v)
+                        pound.setText("Pound: " + genRandomNumber1());
+
+
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -706,6 +725,22 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     } // end onCreate method
 
 
+    public synchronized int genRandomNumber1(){
+        Random random = new Random();
+        int rand = random.nextInt(10);
+        return  rand;
+
+    };
+
+    public synchronized int genRandomNumber2(){
+        Random random = new Random();
+        int rand = random.nextInt(10);
+        return  rand;
+
+    };
+
+
+
     //Methods to mplement the Spinner
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -717,10 +752,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
     }
 
-    public void onNothingSelected(AdapterView<?> parent) {
-        // TODO Auto-generated method stub
-
-    }
 
 
 
@@ -771,7 +802,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 
     // list device method: --> list current connect devices....
-    public void list(View view) throws IOException{ // list paired devices
+    public void list(View view) throws IOException, InterruptedIOException, InterruptedException { // list paired devices
         // get paired devices
         pairedDevices = myBluetoothAdapter.getBondedDevices();
 
@@ -781,7 +812,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             if (mac.equals("30:14:06:20:13:60")) { // if the mac equals the mac of the device attempting to connect --> Output a masage --> this is only for testing purposes --> then create a socket for the device to connect on
                 //  Toast.makeText(getApplicationContext(),device.getName() + " : " + device.getAddress(),Toast.LENGTH_LONG).show();
                 // create a socket for the corect device
-                createSocket(device);
+               // createSocket(device);
             }
 
             //add the found paired devices to an array
@@ -839,8 +870,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
         }
     };
+
+
     //creat socket and for device
-    private void createSocket(BluetoothDevice device)throws IOException, NoSuchElementException {
+    private void createSocket(BluetoothDevice device) throws IOException, NoSuchElementException, InterruptedIOException, InterruptedException {
         final UUID dev_uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
         //final UUID dev_uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
         //Toast.makeText(getApplicationContext(), "Reached Creating Socket", Toast.LENGTH_LONG).show();
@@ -848,6 +881,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         InputStream iStream = null;
         OutputStream oStream = null;
         BluetoothDevice test_dev;
+
 
         try {
 
@@ -860,14 +894,17 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             e1.printStackTrace();
             Log.e("", "Error Creating Socket");
         }
-
-        socket = temp;
-        String test= socket.toString();
+        try {
+            socket = temp;
+        String test = socket.toString();
         test_dev = socket.getRemoteDevice();
         connectSocket(socket, device);
+    }catch(Exception e){
+        e.printStackTrace();
+    }
     }
 
-    public void connectSocket(BluetoothSocket socket, BluetoothDevice device)  throws IOException{
+    public void connectSocket(BluetoothSocket socket, BluetoothDevice device) throws IOException, InterruptedException {
 
         myBluetoothAdapter.cancelDiscovery();
 
@@ -881,8 +918,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
             Toast.makeText(getApplicationContext(), "Socket Connected", Toast.LENGTH_LONG).show();
 
-            thread = new ConnectedThread(socket);
-            thread.run();
+
+
 
 
         } catch (IOException e) {
@@ -892,7 +929,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
                 socket.close();
                 Toast.makeText(getApplicationContext(), "Socket Closed", Toast.LENGTH_LONG).show();
-
             } catch (Exception e1) {
 
 
@@ -908,7 +944,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 
 
+
+
+
     private class ConnectedThread extends Thread {
+        int run_counter=0;
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
@@ -924,14 +964,39 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
         }
+        public ConnectedThread() {
 
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+
+            // Get the input and output streams, using temp objects because
+            // member streams are final
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) {
+            }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+
+        }
+        public void RUNN(){
+            Toast.makeText(getApplicationContext(), "RUN:: ", Toast.LENGTH_SHORT).show();
+
+        }
 
         public void run() {
+            run_counter++;
+            Toast.makeText(getApplicationContext(), "Run : num:: " +Integer.toString(run_counter) , Toast.LENGTH_SHORT).show();
             BluetoothSocket mmSocket = socket;
             final InputStream mmInStream;
             final OutputStream mmOutStream;
@@ -944,11 +1009,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
-
 
 
             byte[] buffer;  // buffer store for the stream
@@ -960,30 +1025,47 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 // Read from the InputStream
                 buffer = new byte[8]; //byte[1024];
                 bytes = mmInStream.read(buffer);
+                String  string = new String(buffer);
 
-                mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-                        .sendToTarget();
-                thread.sleep(1000);
+
+
+
+
+
+                /*mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+                        .sendToTarget();*/
+                //thread.sleep(100);
+
+
+               // grabInfo(socket);
             } catch (Exception e) {
-                thread.run();
+
                 e.printStackTrace();
 
             }
 
         }
 
+
         /* Call this from the main activity to send data to the remote device */
         public void write(byte[] bytes) {
             try {
                 mmOutStream.write(bytes);
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
 
         /* Call this from the main activity to shutdown the connection */
         public void cancel() {
             try {
                 mmSocket.close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
+        }
+
+        public void destroy() {
+
+            thread.stop();
         }
     }
 
