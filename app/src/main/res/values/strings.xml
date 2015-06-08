@@ -13,6 +13,19 @@
     <string name="hello_world">This is the screen where the Graph will go</string>
     <string name="Loading">Loading...</string>
     <string name="LoadVal"></string>
+    <string name="toggle_button_bluetooth">Bluetooth</string>
+    <string name="toggle_button_sound">Sound</string>
     <string name="title_activity_graph">graph</string>
+
+    <string-array name="pound_list">
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+
+    </string-array>
+
 
 </resources>
